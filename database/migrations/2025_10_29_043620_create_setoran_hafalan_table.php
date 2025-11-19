@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('nilai_angka')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
-            
+            $table->enum('status_setoran', ['pending', 'diterima', 'ditolak'])->default('pending');
             $table->index(['santri_id', 'tanggal_setoran']);
         });
     }

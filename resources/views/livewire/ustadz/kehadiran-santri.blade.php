@@ -66,7 +66,7 @@
         <table class="w-full">
             <thead class="bg-gray-50 border-b">
                 <tr>
-                    <th class="p-4 text-sm font-semibold text-gray-600">#</th>
+                    <th class="p-4 text-sm font-semibold text-gray-600"></th>
                     <th class="p-4 text-sm font-semibold text-gray-600">Nama</th>
                     <th class="p-4 text-sm font-semibold text-gray-600">Kelas</th>
                     <th class="p-4 text-sm font-semibold text-gray-600">Aksi</th>
@@ -96,7 +96,7 @@
                                         wire:click="updateKehadiran({{ $santri['id'] }}, '{{ $status }}')"
                                         class="px-4 py-1.5 rounded-lg text-sm font-medium transition
                                         @if ($santri['status_kehadiran'] === $status)
-                                            bg-indigo-600 text-white shadow
+                                            bg-green-600 text-white shadow
                                         @else
                                             hover:bg-gray-200
                                         @endif">

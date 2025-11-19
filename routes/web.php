@@ -15,6 +15,10 @@ use App\Livewire\Admin\SantriExcel;
 use App\Livewire\Ustadz\SantriBinaan;
 use App\Livewire\Ustadz\KehadiranSantri;
 use App\Livewire\Ustadz\RiwayatHafalan;
+use App\Livewire\Ustadz\MonitoringHafalan;
+use App\Livewire\Admin\Profile;
+use App\Livewire\Ustadz\ProfileUstadz;
+use App\Livewire\Admin\Notifikasi;
 
 // ==============================
 // 🏠 HALAMAN UTAMA
@@ -35,6 +39,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
         // dummy logout tanpa auth
         return redirect()->route('auth.login');
     })->name('logout');
+
 });
 
 
@@ -50,6 +55,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/admin/dataustadz', DataUstadz::class)->name('data-ustadz');
     Route::get('/laporan/hafalan', LaporanHafalan::class)->name('laporan.hafalan');
     Route::get('/santri/excel', SantriExcel::class)->name('santri-excel');
+    Route::get('/profile', Profile::class)->name('profile');
+    Route::get('/notifikasi', Notifikasi::class)->name('notifikasi');
 });
 
 
@@ -64,4 +71,6 @@ Route::prefix('ustadz')->name('ustadz.')->group(function () {
     Route::get('/input-setoran/{santri_id?}', InputSetoran::class)->name('input-setoran');
     Route::get('/kehadiran-santri', KehadiranSantri::class)->name('kehadiran-santri');
     Route::get('/riwayat-hafalan', RiwayatHafalan::class)->name('riwayat-hafalan');
+    Route::get('/monitoring-hafalan', MonitoringHafalan::class)->name('monitoring-hafalan');
+    Route::get('/profile', ProfileUstadz::class)->name('profile-ustadz');
 });

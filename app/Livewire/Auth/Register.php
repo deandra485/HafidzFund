@@ -1,12 +1,11 @@
 <?php
 
-// app/Livewire/Auth/Register.php
 namespace App\Livewire\Auth;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\User;
-use App\Models\LogAktivitas;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Hash;
 
 #[Layout('layouts.auth')]
@@ -29,39 +28,41 @@ class Register extends Component
         'no_telp' => 'nullable|max:20',
     ];
 
-    protected $messages = [
-        'username.required' => 'Username harus diisi',
-        'username.unique' => 'Username sudah digunakan',
-        'username.alpha_dash' => 'Username hanya boleh huruf, angka, dash dan underscore',
-        'password.required' => 'Password harus diisi',
-        'password.min' => 'Password minimal 6 karakter',
-        'password.confirmed' => 'Konfirmasi password tidak cocok',
-        'nama_lengkap.required' => 'Nama lengkap harus diisi',
-        'email.required' => 'Email harus diisi',
-        'email.email' => 'Format email tidak valid',
-        'email.unique' => 'Email sudah terdaftar',
-    ];
-
     public function register()
     {
         $this->validate();
 
         try {
-            $user = User::create([
-            'name' => $this->nama_lengkap, // ubah ke 'name'
-            'username' => $this->username,
-            'password' => Hash::make($this->password),
-            'role' => $this->role,
-            'email' => $this->email,
-            'no_telp' => $this->no_telp,
-            'whatsapp' => $this->no_telp,
-            'nama_lengkap' => $this->nama_lengkap,
-            'is_active' => true,
-        ]);
 
-            session()->flash('message', 'Registrasi berhasil! Tunggu aktivasi dari admin.');
-            
+            // BUAT USER BARU — status pending
+            $user = User::create([
+                'name' => $this->nama_lengkap,
+                'username' => $this->username,
+                'password' => Hash::make($this->password),
+                'role' => $this->role,
+                'email' => $this->email,
+                'no_telp' => $this->no_telp,
+                'whatsapp' => $this->no_telp,
+                'nama_lengkap' => $this->nama_lengkap,
+                'is_active' => false, // pengguna harus dikonfirmasi admin
+            ]);
+
+            // ==============================
+            // 🔔 BUAT NOTIFIKASI UNTUK ADMIN
+            // ==============================
+
+            Notification::create([
+                'user_id' => 1, // ID admin (ubah jika perlu)
+                'title' => 'Pengguna baru menunggu konfirmasi: ' . $user->name,
+                'type' => 'registrasi',
+                'related_id' => $user->id,
+                'is_read' => false,
+            ]);
+
+            session()->flash('message', 'Registrasi berhasil! Tunggu konfirmasi dari admin.');
+
             return redirect()->route('auth.login');
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

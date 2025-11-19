@@ -86,9 +86,11 @@
             </a>
 
             <!-- Pengaturan -->
-            <a href="#" onclick="showSection('setting')" class="sidebar-item"
-                style="display: flex; align-items: center; padding: 0.75rem; border-radius: 0.75rem;
-                text-decoration: none; color: #6b7280;">
+            <a href="{{ route('admin.profile') }}" onclick="showSection('setting')" class="sidebar-item" wire:navigate
+               style="display: flex; align-items: center; padding: 0.75rem; border-radius: 0.75rem; text-decoration: none;
+                {{ request()->routeIs('admin.profile')
+                    ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;'
+                    : 'color: #6b7280;' }}">
                 <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

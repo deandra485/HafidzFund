@@ -370,112 +370,102 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('livewire:initialized', () => {
-            // Bar Chart
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: @js($barChartLabels),
-                    datasets: [{
-                        label: 'Jumlah Setoran',
-                        data: @js($barChartData),
-                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 10
-                            }
-                        }
-                    }
-                }
-            });
+    document.addEventListener('livewire:initialized', () => {
 
-            // Pie Chart
-            const ctxPie = document.getElementById('pieChart').getContext('2d');
-            new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: @js($pieChartLabels),
-                    datasets: [{
-                        data: @js($pieChartData),
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(239, 68, 68, 0.8)'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            // Line Chart
-            const ctxLine = document.getElementById('lineChart').getContext('2d');
-            new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: @js($lineChartLabels),
-                    datasets: [{
-                        label: 'Rata-rata Nilai',
-                        data: @js($lineChartData),
-                        borderColor: 'rgba(139, 92, 246, 1)',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3,
-                        pointBackgroundColor: 'rgba(139, 92, 246, 1)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+        // ================= BAR CHART =================
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        let barChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: @js($barChartLabels),
+                datasets: [{
+                    label: 'Jumlah Setoran',
+                    data: @js($barChartData),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false }},
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 10 }}}
+            }
         });
-    </script>
+
+        // ================= PIE CHART =================
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        let pieChart = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: @js($pieChartLabels),
+                datasets: [{
+                    data: @js($pieChartData),
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false }}
+            }
+        });
+
+        // ================= LINE CHART =================
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        let lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: @js($lineChartLabels),
+                datasets: [{
+                    label: 'Rata-rata Nilai',
+                    data: @js($lineChartData),
+                    borderColor: 'rgba(139, 92, 246, 1)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(139, 92, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: true, position: 'top' }},
+                scales: { y: { beginAtZero: true, max: 100 }}
+            }
+        });
+
+        // ================= UPDATE CHARTS (DINAMIS) =================
+        Livewire.on('updateCharts', (data) => {
+
+            // --- Bar Chart ---
+            barChart.data.labels = data.barLabels;
+            barChart.data.datasets[0].data = data.barValues;
+            barChart.update();
+
+            // --- Pie Chart ---
+            pieChart.data.labels = data.pieLabels;
+            pieChart.data.datasets[0].data = data.pieValues;
+            pieChart.update();
+
+            // --- Line Chart ---
+            lineChart.data.labels = data.lineLabels;
+            lineChart.data.datasets[0].data = data.lineValues;
+            lineChart.update();
+        });
+    });
+</script>
     @endpush
 </div>

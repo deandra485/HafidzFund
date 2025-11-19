@@ -16,14 +16,37 @@
         <!-- Main Content -->
 <div class="min-h-screen bg-gray-50">
     <!-- HEADER -->
-    <header class="backdrop-blur-md bg-white/70 shadow-sm border-b border-green-100 sticky top-0 z-50">
+        <header class="backdrop-blur-md bg-white/70 shadow-sm border-b border-green-100 sticky top-0 z-50">
         <div class="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
-            <p class="text-sm text-gray-500">Selamat datang kembali, Admin!</p>
-        </div>
+
+            <!-- Left Title -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
+                <p class="text-sm text-gray-500">Selamat datang kembali, Admin!</p>
+            </div>
+
+            <!-- Right Section: Notification Bell -->
+            <div class="flex items-center gap-4">
+                <!-- Notif Bell -->
+                <a href="{{ route('admin.notifikasi') }}" wire:navigate class="relative">
+                    <!-- Bell Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.8" stroke="currentColor"
+                        class="w-7 h-7 text-gray-700 hover:text-green-600 transition">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M14.857 17.657A2 2 0 0113.03 19H10.97a2 2 0 01-1.828-1.343M15 10V8a3 3 0 10-6 0v2a6 6 0 00-1.2 3.6l-.268 2.683A1 1 0 008.52 18h6.96a1 1 0 00.988-1.717l-.268-2.683A6 6 0 0015 10z" />
+                    </svg>
+                    <!-- Red badge -->
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
+                        3
+                    </span>
+                </a>
+            </div>
+
         </div>
     </header>
+
 
         <!-- STAT CARDS -->
         <main style="flex: 1; overflow-y: auto; padding: 1.5rem; background-color: #f9fafb;">
@@ -145,6 +168,10 @@
             // 2. CREATE HAFALAN CHART
             // =======================
             const ctxHafalan = document.getElementById('hafalanChart').getContext('2d');
+
+            const maxValue = Math.max(...initialHafalan.data);
+            const yMax = maxValue + 2; // agar batang tidak rata
+
             window.hafalanChart = new Chart(ctxHafalan, {
                 type: 'bar',
                 data: {
@@ -154,11 +181,24 @@
                         data: initialHafalan.data,
                         backgroundColor: 'rgba(139, 92, 246, 0.8)',
                         borderColor: 'rgba(139, 92, 246, 1)',
+                        borderWidth: 1,
                         borderRadius: 8,
                     }]
                 },
-                options: { responsive: true }
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: yMax, // skala menyesuaikan data tertinggi
+                            ticks: {
+                                precision: 0 // biar angka bulat
+                            }
+                        }
+                    }
+                }
             });
+
 
             // =======================
             // 3. CREATE KEUANGAN CHART

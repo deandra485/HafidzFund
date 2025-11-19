@@ -30,49 +30,62 @@ class KehadiranSantri extends Component
         $this->loadSantri();
     }
 
-    public function updatedSearch()        { $this->loadSantri(); }
-    public function updatedFilterKelas()   { $this->loadSantri(); }
-    public function updatedTanggal()       { $this->loadSantri(); }
+    public function updatedSearch()      { $this->loadSantri(); }
+    public function updatedFilterKelas() { $this->loadSantri(); }
+    public function updatedTanggal()     { $this->loadSantri(); }
 
     /**
+     * =============================
      * HITUNG STATISTIK
+     * =============================
      */
     public function hitungStatistik()
     {
         $this->statistik = [
-            'hadir' => KehadiranSetoran::where('tanggal', $this->tanggal)->where('status_kehadiran', 'hadir')->count(),
-            'izin'  => KehadiranSetoran::where('tanggal', $this->tanggal)->where('status_kehadiran', 'izin')->count(),
-            'sakit' => KehadiranSetoran::where('tanggal', $this->tanggal)->where('status_kehadiran', 'sakit')->count(),
-            'alpa'  => KehadiranSetoran::where('tanggal', $this->tanggal)->where('status_kehadiran', 'alpa')->count(),
+            'hadir' => KehadiranSetoran::whereDate('tanggal', $this->tanggal)->where('status_kehadiran', 'hadir')->count(),
+            'izin'  => KehadiranSetoran::whereDate('tanggal', $this->tanggal)->where('status_kehadiran', 'izin')->count(),
+            'sakit' => KehadiranSetoran::whereDate('tanggal', $this->tanggal)->where('status_kehadiran', 'sakit')->count(),
+            'alpa'  => KehadiranSetoran::whereDate('tanggal', $this->tanggal)->where('status_kehadiran', 'alpa')->count(),
         ];
     }
 
     /**
-     * MEMUAT DATA SANTRI + STATUS SETORAN OTOMATIS
+     * =============================
+     * LOAD DATA SANTRI + KEHADIRAN
+     * =============================
      */
     public function loadSantri()
     {
+        // Ambil daftar santri sesuai ustadz pembimbing
         $santri = Santri::query()
-            ->when($this->search, fn($q) => $q->where('nama_lengkap', 'like', "%{$this->search}%"))
-            ->when($this->filterKelas, fn($q) => $q->where('kelas', $this->filterKelas))
+            ->where('ustadz_pembimbing_id', Auth::id())
+            ->when($this->search, fn($q) =>
+                $q->where('nama_lengkap', 'like', "%{$this->search}%")
+            )
+            ->when($this->filterKelas, fn($q) =>
+                $q->where('kelas', $this->filterKelas)
+            )
             ->orderBy('nama_lengkap')
             ->get();
 
-        $this->santriList = $santri->map(function ($s) {
+        // Ambil semua kehadiran dalam 1 query (lebih efisiensi)
+        $kehadiranHariIni = KehadiranSetoran::where('tanggal', $this->tanggal)->get()
+            ->keyBy('santri_id');
 
-            // Cek kehadiran
-            $kehadiran = KehadiranSetoran::where('santri_id', $s->id)
-                ->where('tanggal', $this->tanggal)
-                ->first();
+        $this->santriList = $santri->map(function ($s) use ($kehadiranHariIni) {
+
+            $kehadiran = $kehadiranHariIni->get($s->id);
 
             return [
-                'id'                => $s->id,
-                'nama'              => $s->nama_lengkap,
-                'kelas'             => $s->kelas,
-                'progress'          => $s->progress_hafalan ?? '-',
+                'id'               => $s->id,
+                'nama'             => $s->nama_lengkap,
+                'kelas'            => $s->kelas,
 
-                // Kehadiran manual
-                'status_kehadiran'  => $kehadiran->status_kehadiran ?? 'belum',
+                // Ini data tambahan kalau mau ditampilkan
+                'progress'         => $s->progress_hafalan ?? '-',
+
+                // Status default: "belum"
+                'status_kehadiran' => $kehadiran->status_kehadiran ?? 'belum',
             ];
 
         })->toArray();
@@ -81,18 +94,25 @@ class KehadiranSantri extends Component
     }
 
     /**
-     * UPDATE KEHADIRAN SAJA
+     * =============================
+     * UPDATE STATUS KEHADIRAN
+     * =============================
      */
     public function updateKehadiran($santriId, $status)
     {
         KehadiranSetoran::updateOrCreate(
-            ['santri_id' => $santriId, 'tanggal' => $this->tanggal],
-            ['status_kehadiran' => $status]
+            [
+                'santri_id' => $santriId,
+                'tanggal'   => $this->tanggal,
+            ],
+            [
+                'status_kehadiran' => $status,
+            ]
         );
 
         LogAktivitas::create([
             'user_id'   => Auth::id(),
-            'aktivitas' => "Update Kehadiran Santri ID $santriId menjadi $status"
+            'aktivitas' => "Update kehadiran Santri ID $santriId menjadi $status pada tanggal {$this->tanggal}",
         ]);
 
         $this->loadSantri();

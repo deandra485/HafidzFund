@@ -12,11 +12,11 @@
                 ← Kembali
             </a> --}}
 
-            <button
-                onclick="window.location='{{ route('admin.santri-excel') }}'" wire:navigate
+            <a
+                href="{{ route('admin.santri-excel') }}" wire:navigate
                 class="flex items-center gap-2 border border-gray-200 bg-white px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-100">
                 ⬇️ Import Excel
-            </button>
+            </a>
 
 
             <button wire:click="openModal('add')"

@@ -24,6 +24,7 @@ class SetoranHafalan extends Model
         'penilaian',
         'nilai_angka',
         'catatan',
+        'status_setoran',
     ];
 
     protected $casts = [

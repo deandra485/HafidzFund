@@ -1,7 +1,4 @@
-<!-- Sidebar Ustadz Panel -->
 <aside id="sidebar" style="width: 16rem; height: 100vh; position: fixed; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); flex-shrink: 0; z-index: 9999; overflow-y: auto;">
-    
-    <!-- Header -->
     <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
         <div style="display: flex; align-items: center;">
             <img src="{{ asset('enno/assets/img/logo2.png') }}" style="width: 2.5rem; height: 2.5rem;">
@@ -77,9 +74,12 @@
             </a>
 
             <!-- Monitoring Target -->
-            <a href="#"
-                style="display: flex; align-items: center; padding: 0.75rem; border-radius: 0.75rem;
-                text-decoration: none; color: #6b7280;">
+            <a href="{{ route('ustadz.monitoring-hafalan') }}" wire:navigate
+               style="display: flex; align-items: center; padding: 0.75rem; border-radius: 0.75rem;
+                text-decoration: none;
+                {{ request()->routeIs('ustadz.monitoring-hafalan') 
+                    ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;' 
+                    : 'color: #6b7280;' }}">
                 <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -89,9 +89,12 @@
             </a>
 
              <!-- Pengaturan -->
-            <a href="#" onclick="showSection('setting')" class="sidebar-item"
+            <a href="{{ route('ustadz.profile-ustadz') }}" class="sidebar-item" wire:navigate
                 style="display: flex; align-items: center; padding: 0.75rem; border-radius: 0.75rem;
-                text-decoration: none; color: #6b7280;">
+                text-decoration: none;
+                {{ request()->routeIs('ustadz.profile-ustadz') 
+                    ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;' 
+                    : 'color: #6b7280;' }}">
                 <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
