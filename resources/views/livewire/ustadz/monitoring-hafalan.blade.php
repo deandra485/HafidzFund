@@ -1,11 +1,11 @@
-<div class="flex flex-col h-full overflow-hidden">
+<div class="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
 
     <!-- Header -->
-    <header class="backdrop-blur-md bg-white/80 shadow border-b border-green-100 sticky top-0 z-50">
+    <header class="backdrop-blur-md bg-white/70 shadow-sm border-b border-green-100 sticky top-0 z-50">
         <div class="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Monitoring Hafalan Santri</h1>
-                <p class="text-gray-500 mt-1">Monitor progres hafalan santri secara real-time</p>
+                <p class="text-gray-500 mt-1">Kelola dan pantau monitoring hafalan santri secara real-time</p>
             </div>
         </div>
     </header>
@@ -73,55 +73,79 @@
 
     </div>
 
-    <!-- Grafik -->
+    <!-- ================= BAR CHART ================= -->
     <div class="bg-white p-4 rounded-xl shadow mb-10">
-        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-        </svg>
-        <h3 class="text-lg font-semibold"> Grafik Setoran Hafalan</h3>
+        <h3 class="text-lg font-semibold">Grafik Setoran Hafalan</h3>
         <p class="text-sm text-gray-500 mb-4">Periode: {{ $periodeLabel }}</p>
-        <canvas id="chartSetoran" class="w-full" height="120"></canvas>
+
+    <div class="h-64">  <!-- GRAFIK TIDAK AKAN GEDE LAGI -->
+        <canvas id="chartSetoran"></canvas>
+    </div>
     </div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('livewire:initialized', () => {
-    let barChart = null;
 
-    Livewire.on('updateChart', (labels, data) => {
-        if (barChart) barChart.destroy();
+    let chart = null;
 
-        const ctx = document.getElementById('chartSetoran').getContext('2d');
-        barChart = new Chart(ctx, {
+    Livewire.on('updateChart', ({ labels, data }) => {
+
+        const canvas = document.getElementById('chartSetoran');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        if (chart) chart.destroy();
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, "rgba(59,130,246,0.8)");
+        gradient.addColorStop(1, "rgba(56,189,248,0.4)");
+
+        chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        type: 'line',
-                        label: "Trend Setoran",
-                        data: data,
-                        borderColor: 'rgba(99,102,241,1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: false,
-                    },
-                    {
-                        type: 'bar',
-                        label: "Jumlah Setoran",
-                        data: data,
-                        backgroundColor: 'rgba(59,130,246,0.5)',
-                        borderColor: 'rgba(59,130,246,1)',
-                        borderWidth: 1,
-                        borderRadius: 6,
-                    }
-                ]
+                datasets: [{
+                    label: "Nilai Setoran",
+                    data: data,
+                    backgroundColor: gradient,
+                    borderColor: "rgba(59,130,246,1)",
+                    borderWidth: 2,
+                    borderRadius: 12,
+                }]
             },
             options: {
                 responsive: true,
-                scales: { y: { beginAtZero: true } }
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: Math.max(...data) + 6,
+                        ticks: {
+                            precision: 0,    // ⬅️ angka jadi 1,2,3,4 (tanpa koma)
+                            stepSize: 1,     // ⬅️ biar integer
+                            color: "#6b7280",
+                            font: { size: 12 }
+                        },
+                        grid: {
+                            color: "rgba(203,213,225,0.4)",
+                            borderDash: [4,4]
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: "#374151",
+                            font: { size: 12, weight: "600" }
+                        },
+                        grid: { display: false }
+                    }
+                }
             }
         });
+
     });
 });
 </script>

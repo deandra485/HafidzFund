@@ -59,12 +59,12 @@
                         <a href="{{ route('admin.manajemen-keuangan') }}" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition" wire:navigate>
                             Batal
                         </a>
-                        <a type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2" wire:navigate>
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Simpan
-                        </a>
+                        </button>
                     </div>
                 </form>
             </div>

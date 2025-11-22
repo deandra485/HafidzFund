@@ -39,7 +39,7 @@
                     </svg>
                     <!-- Red badge -->
                     <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
-                        3
+                        {{ $unreadNotifikasi }}
                     </span>
                 </a>
             </div>

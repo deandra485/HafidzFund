@@ -50,7 +50,7 @@
                         <option value="">-- Pilih Santri Binaan --</option>
                         @forelse ($santriList as $santri)
                             <option value="{{ $santri->id }}">
-                                {{ $santri->nama_lengkap }} ({{ $santri->kelas ?? '-' }}, {{ $santri->angkatan ?? '-' }})
+                                {{ $santri->nama_lengkap }} (kelas {{ $santri->kelas ?? '-' }}, angkatan {{ $santri->angkatan ?? '-' }})
                             </option>
                         @empty
                             <option value="">Tidak ada santri binaan ditemukan</option>

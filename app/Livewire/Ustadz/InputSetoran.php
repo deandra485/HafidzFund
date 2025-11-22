@@ -53,17 +53,20 @@ class InputSetoran extends Component
         $this->tanggal_setoran = now()->format('Y-m-d\TH:i');
 
         // ✅ Ambil daftar surah dari API
-        try {
-            $response = Http::get('https://api.alquran.cloud/v1/surah');
-            if ($response->successful()) {
-                $data = $response->json();
-                $this->daftarSurah = $data['data']; // daftar semua surah
-            } else {
-                $this->daftarSurah = [];
-            }
-        } catch (\Exception $e) {
+       try {
+        $response = Http::get('https://api.alquran.cloud/v1/surah');
+        if ($response->successful()) {
+            $data = $response->json();
+            $this->daftarSurah = $data['data'];
+
+            // Simpan ke JSON agar tidak bergantung API next time
+            file_put_contents(storage_path('app/quran/surah.json'), json_encode($data['data'], JSON_PRETTY_PRINT));
+        } else {
             $this->daftarSurah = [];
         }
+    } catch (\Exception $e) {
+        $this->daftarSurah = [];
+    }
     }
 
     public function updatedSantriId($value)

@@ -49,6 +49,20 @@ class Notifikasi extends Component
         $this->loadNotifications();
     }
 
+    // ======================
+    // 🔴 Hapus notifikasi
+    // ======================
+    public function deleteNotif($id)
+    {
+        $notif = Notification::find($id);
+
+        if ($notif) {
+            $notif->delete();
+        }
+
+        $this->loadNotifications();
+    }
+
     public function render()
     {
         return view('livewire.admin.notifikasi', [

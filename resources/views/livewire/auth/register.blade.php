@@ -105,19 +105,24 @@
                     <div>
                         <p class="text-sm font-semibold text-yellow-800">Perhatian!</p>
                         <p class="text-sm text-yellow-700">Untuk Username, gunakan format: ustadz_nama atau ustadzah_nama</p>
+                        <p class="text-sm text-yellow-700">Untuk Login Tunggu konfirmasi dari admin</p>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" 
-                    class="w-full mt-6 bg-gradient-to-r from-orange-600 to-orange-700 text-white py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-800 transition shadow-lg">
-                Daftar Sekarang
-            </button>
+            <div class="w-full mt-5">
+                <a href="{{ route('auth.login') }}"
+                wire:navigate
+                class="block w-full bg-orange-600 text-white py-3 rounded-lg font-semibold
+                        hover:bg-orange-700 transition duration-300 text-center">
+                    Login
+                </a>
+            </div>
 
             <div class="mt-4 text-center">
                 <p class="text-sm text-gray-600">
                     Sudah punya akun? 
-                    <a href="{{ route('auth.login') }}" class="text-orange-600 hover:text-orange-700 font-semibold">Login di sini</a>
+                    <a href="{{ route('auth.login') }}" wire:navigate class="text-orange-600 hover:text-orange-700 font-semibold">Login di sini</a>
                 </p>
             </div>
         </form>

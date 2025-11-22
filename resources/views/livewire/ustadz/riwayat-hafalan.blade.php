@@ -1,11 +1,11 @@
-<div class="flex flex-col h-full overflow-hidden">
+<div class="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
 
     <!-- Header -->
-    <header class="backdrop-blur-md bg-white/80 shadow border-b border-green-100 sticky top-0 z-50">
+    <header class="backdrop-blur-md bg-white/70 shadow-sm border-b border-green-100 sticky top-0 z-50">
         <div class="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Riwayat Hafalan Santri</h1>
-                <p class="text-gray-500 mt-1">Pantau dan kelola seluruh riwayat hafalan dengan mudah & cepat</p>
+                <p class="text-gray-500 mt-1">Kelola dan pantau riwayat hafalan santri secara real-time</p>
             </div>
         </div>
     </header>

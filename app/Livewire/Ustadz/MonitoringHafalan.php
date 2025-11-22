@@ -12,12 +12,8 @@ use App\Models\SetoranHafalan;
 class MonitoringHafalan extends Component
 {
     public $periode = 'minggu';
-    public $filterSantri = '';   // menyesuaikan blade
+    public $filterSantri = '';
     public $periodeLabel = '';
-
-    // Chart Data
-    public $labels = [];
-    public $data = [];
 
     // Statistik
     public $stat = [];
@@ -67,50 +63,46 @@ class MonitoringHafalan extends Component
         $dateQuery = match ($this->periode) {
             'minggu' => now()->subDays(7),
             'bulan'  => now()->subDays(30),
-            'custom' => now()->subDays(7), // aman dulu
+            'custom' => now()->subDays(7), // default
             default  => now()->subDays(7),
         };
 
-        // Statistik
-        $statTotal = SetoranHafalan::whereIn('santri_id', $santriIds)
-            ->where('created_at', '>=', $dateQuery)
-            ->count();
-
-        $statLancar = SetoranHafalan::whereIn('santri_id', $santriIds)
-            ->where('status_setoran', 'diterima')
-            ->where('created_at', '>=', $dateQuery)
-            ->count();
-
-        $statKurang = SetoranHafalan::whereIn('santri_id', $santriIds)
-            ->where('status_setoran', 'ditolak')
-            ->where('created_at', '>=', $dateQuery)
-            ->count();
-
-        $statTerbata = SetoranHafalan::whereIn('santri_id', $santriIds)
-            ->where('status_setoran', 'pending')
-            ->where('created_at', '>=', $dateQuery)
-            ->count();
-
-        // Masukkan ke array untuk Blade
+        /*
+        |--------------------------------------------------------------------------
+        | STATISTIK SETORAN
+        |--------------------------------------------------------------------------
+        */
         $this->stat = [
-            'total'         => $statTotal,
-            'lancar'        => $statLancar,
-            'kurang_lancar' => $statKurang,
-            'terbata'       => $statTerbata,
+            'total'         => SetoranHafalan::whereIn('santri_id', $santriIds)->where('created_at', '>=', $dateQuery)->count(),
+            'lancar'        => SetoranHafalan::whereIn('santri_id', $santriIds)->where('status_setoran', 'diterima')->where('created_at', '>=', $dateQuery)->count(),
+            'kurang_lancar' => SetoranHafalan::whereIn('santri_id', $santriIds)->where('status_setoran', 'ditolak')->where('created_at', '>=', $dateQuery)->count(),
+            'terbata'       => SetoranHafalan::whereIn('santri_id', $santriIds)->where('status_setoran', 'pending')->where('created_at', '>=', $dateQuery)->count(),
         ];
 
-        // Grafik
-        $records = SetoranHafalan::selectRaw('santri_id, COUNT(*) as total')
-            ->whereIn('santri_id', $santriIds)
-            ->where('created_at', '>=', $dateQuery)
-            ->groupBy('santri_id')
-            ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | GRAFIK PER SANTRI
+        |--------------------------------------------------------------------------
+        */
+        $santriList = Santri::where('ustadz_pembimbing_id', $ustadzId)->get();
 
-        $this->labels = $records->map(fn ($r) => Santri::find($r->santri_id)->nama_lengkap)->toArray();
-        $this->data   = $records->pluck('total')->toArray();
+        $labels = [];
+        $data = [];
 
-        // kirim event ke JS
-        $this->dispatch('updateChart', labels: $this->labels, data: $this->data);
+        foreach ($santriList as $santri) {
+            // Hitung setoran per santri
+            $totalNilai = SetoranHafalan::where('santri_id', $santri->id)
+                ->where('created_at', '>=', $dateQuery)
+                ->sum('nilai_angka');
+
+
+            // Masukkan nama santri + jumlah setoran
+            $labels[] = $santri->nama_lengkap;
+            $data[] = $totalNilai;
+        }
+
+        // kirim ke JS chart
+        $this->dispatch('updateChart', labels: $labels, data: $data);
     }
 
     public function render()
