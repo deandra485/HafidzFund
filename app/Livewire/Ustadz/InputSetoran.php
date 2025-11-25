@@ -48,26 +48,42 @@ class InputSetoran extends Component
         ];
     }
 
-    public function mount()
-    {
-        $this->tanggal_setoran = now()->format('Y-m-d\TH:i');
+        public function mount()
+        {
+            $this->tanggal_setoran = now()->format('Y-m-d\TH:i');
 
-        // ✅ Ambil daftar surah dari API
-       try {
-        $response = Http::get('https://api.alquran.cloud/v1/surah');
-        if ($response->successful()) {
-            $data = $response->json();
-            $this->daftarSurah = $data['data'];
+            $backupPath = storage_path('app/quran/surah.json');
 
-            // Simpan ke JSON agar tidak bergantung API next time
-            file_put_contents(storage_path('app/quran/surah.json'), json_encode($data['data'], JSON_PRETTY_PRINT));
-        } else {
-            $this->daftarSurah = [];
+            try {
+                // Ambil dari API
+                $response = Http::timeout(5)->get('https://api.alquran.cloud/v1/surah');
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $this->daftarSurah = $data['data'];
+
+                    // Simpan backup
+                    if (!file_exists(dirname($backupPath))) {
+                        mkdir(dirname($backupPath), 0755, true);
+                    }
+
+                    file_put_contents($backupPath, json_encode($data['data'], JSON_PRETTY_PRINT));
+
+                    return;
+                }
+            } catch (\Throwable $e) {
+                // Abaikan error, lanjut ke fallback
+            }
+
+            // Fallback: Baca dari backup JSON jika file ada
+            if (file_exists($backupPath)) {
+                $this->daftarSurah = json_decode(file_get_contents($backupPath), true);
+            } else {
+                // Jika backup pun tidak ada, set default
+                $this->daftarSurah = [];
+            }
         }
-    } catch (\Exception $e) {
-        $this->daftarSurah = [];
-    }
-    }
+
 
     public function updatedSantriId($value)
     {

@@ -1,12 +1,11 @@
-<div class="min-h-screen bg-gray-50 p-8">
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v4a3 3 0 106 0v-4a3 3 0 00-3-3z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8V5m0 0a3 3 0 013 3h-6a3 3 0 013-3z" />
-            </svg>
-            Form Transaksi Baru
-        </h1>
+<div class="bg-white shadow rounded-xl border border-gray-200">
+
+    <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b border-gray-200 backdrop-blur-md bg-white/70 sticky top-0 z-50">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900">Input Transaksi</h1>
+            <p class="text-gray-500 mt-1">Form untuk memasukkan data transaksi baru</p>
+        </div>
+    </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {{-- 🧾 KIRI: Form Transaksi --}}

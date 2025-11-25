@@ -4,6 +4,7 @@ namespace App\Livewire\Ustadz;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\WithPagination;
 use App\Models\Santri;
 use App\Models\SetoranHafalan;
 use Illuminate\Support\Facades\Auth;
@@ -11,11 +12,20 @@ use Illuminate\Support\Facades\Auth;
 #[Layout('layouts.guest-user')]
 class RiwayatHafalan extends Component
 {
+    use WithPagination;
+
     public $searchSantri = '';
     public $filterTanggal = '';
     public $filterJenis = '';
     public $filterPenilaian = '';
     public $detailSetoran = null;
+    public $limit = 10; // NEW
+
+    public function updatingSearchSantri() { $this->resetPage(); }
+    public function updatingFilterTanggal() { $this->resetPage(); }
+    public function updatingFilterJenis() { $this->resetPage(); }
+    public function updatingFilterPenilaian() { $this->resetPage(); }
+    public function updatingLimit() { $this->resetPage(); }
 
     public function showDetail($id)
     {
@@ -50,7 +60,7 @@ class RiwayatHafalan extends Component
                 $q->where('penilaian', $this->filterPenilaian)
             )
             ->orderBy('tanggal_setoran', 'desc')
-            ->get();
+            ->paginate($this->limit);
 
         return view('livewire.ustadz.riwayat-hafalan', [
             'setoran' => $setoran,

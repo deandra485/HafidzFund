@@ -27,6 +27,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Periode</label>
                 <select wire:model.live="periode" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <option value="harian">Hari Ini</option>
                     <option value="bulan_ini">Bulan Ini</option>
                     <option value="3_bulan">3 Bulan Terakhir</option>
                     <option value="6_bulan">6 Bulan Terakhir</option>
@@ -34,6 +35,7 @@
                     <option value="custom">Custom</option>
                 </select>
             </div>
+            <input type="month" wire:model="bulan" class="border px-3 py-2 rounded">
 
             @if($periode === 'custom')
             <div>
@@ -369,103 +371,74 @@
 
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    document.addEventListener('livewire:initialized', () => {
 
-        // ================= BAR CHART =================
-        const ctxBar = document.getElementById('barChart').getContext('2d');
-        let barChart = new Chart(ctxBar, {
-            type: 'bar',
-            data: {
-                labels: @js($barChartLabels),
-                datasets: [{
-                    label: 'Jumlah Setoran',
-                    data: @js($barChartData),
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: false }},
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 10 }}}
-            }
-        });
+<script>
+document.addEventListener("livewire:initialized", () => {
 
-        // ================= PIE CHART =================
-        const ctxPie = document.getElementById('pieChart').getContext('2d');
-        let pieChart = new Chart(ctxPie, {
-            type: 'doughnut',
-            data: {
-                labels: @js($pieChartLabels),
-                datasets: [{
-                    data: @js($pieChartData),
-                    backgroundColor: [
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: false }}
-            }
-        });
+    let barCtx = document.getElementById('barChart').getContext('2d');
+    let lineCtx = document.getElementById('lineChart').getContext('2d');
+    let pieCtx = document.getElementById('pieChart').getContext('2d');
 
-        // ================= LINE CHART =================
-        const ctxLine = document.getElementById('lineChart').getContext('2d');
-        let lineChart = new Chart(ctxLine, {
-            type: 'line',
-            data: {
-                labels: @js($lineChartLabels),
-                datasets: [{
-                    label: 'Rata-rata Nilai',
-                    data: @js($lineChartData),
-                    borderColor: 'rgba(139, 92, 246, 1)',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 3,
-                    pointBackgroundColor: 'rgba(139, 92, 246, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: true, position: 'top' }},
-                scales: { y: { beginAtZero: true, max: 100 }}
-            }
-        });
-
-        // ================= UPDATE CHARTS (DINAMIS) =================
-        Livewire.on('updateCharts', (data) => {
-
-            // --- Bar Chart ---
-            barChart.data.labels = data.barLabels;
-            barChart.data.datasets[0].data = data.barValues;
-            barChart.update();
-
-            // --- Pie Chart ---
-            pieChart.data.labels = data.pieLabels;
-            pieChart.data.datasets[0].data = data.pieValues;
-            pieChart.update();
-
-            // --- Line Chart ---
-            lineChart.data.labels = data.lineLabels;
-            lineChart.data.datasets[0].data = data.lineValues;
-            lineChart.update();
-        });
+    let barChart = new Chart(barCtx, {
+        type: "bar",
+        data: {
+            labels: @json($barChartLabels),
+            datasets: [{
+                label: "Total Setoran",
+                data: @json($barChartData),
+                backgroundColor: "rgba(54, 162, 235, 0.7)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2
+            }]
+        }
     });
+
+    let lineChart = new Chart(lineCtx, {
+        type: "line",
+        data: {
+            labels: @json($lineChartLabels),
+            datasets: [{
+                label: "Rata-rata Nilai",
+                data: @json($lineChartData),
+                borderColor: "rgba(75,192,192,1)",
+                borderWidth: 2,
+                tension: 0.4
+            }]
+        }
+    });
+
+    let pieChart = new Chart(pieCtx, {
+        type: "pie",
+        data: {
+            labels: @json($pieChartLabels),
+            datasets: [{
+                data: @json($pieChartData),
+                backgroundColor: [
+                    "rgba(34,197,94,0.7)",
+                    "rgba(234,179,8,0.7)",
+                    "rgba(239,68,68,0.7)"
+                ]
+            }]
+        }
+    });
+
+    // 🚀 Update grafik ketika Livewire mengirim event
+    Livewire.on("refreshCharts", () => {
+
+        barChart.data.labels = @json($barChartLabels);
+        barChart.data.datasets[0].data = @json($barChartData);
+        barChart.update();
+
+        lineChart.data.labels = @json($lineChartLabels);
+        lineChart.data.datasets[0].data = @json($lineChartData);
+        lineChart.update();
+
+        pieChart.data.labels = @json($pieChartLabels);
+        pieChart.data.datasets[0].data = @json($pieChartData);
+        pieChart.update();
+    });
+
+});
 </script>
     @endpush
 </div>

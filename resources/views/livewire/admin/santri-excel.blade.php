@@ -56,6 +56,34 @@
                 </svg>
                 Export Excel
             </button> --}}
+
+            {{-- Tombol Spreadsheet & Download Template --}}
+        <div class="flex flex-col md:flex-row items-center gap-4 mt-4">
+
+            {{-- Tombol menuju Google Spreadsheet --}}
+            {{-- <a href="https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxx" target="_blank"
+                class="flex items-center gap-2 bg-yellow-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-yellow-600 transition-all shadow-sm hover:shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6M9 8h6m-9 8h6m7 0a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v9z" />
+                </svg>
+                Lihat Format (Spreadsheet)
+            </a> --}}
+
+            {{-- Download Template Excel --}}
+            {{-- <a href="{{ asset('template/template-santri.xlsx') }}" download
+                class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 12v-2a2 2 0 012-2h12a2 2 0 012 2v2M7 16l5-5m0 0l5 5m-5-5v12" />
+                </svg>
+                Download Template Excel
+            </a> --}}
+
+        </div>
+
         </div>
          <div class="mt-8 bg-white border border-gray-100 rounded-lg shadow-sm p-5">
             <p class="text-gray-500 text-sm leading-relaxed">

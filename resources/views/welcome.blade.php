@@ -239,9 +239,7 @@
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 2rem;">
                 <div>
                     <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                        <svg style="width: 2rem; height: 2rem; color: #a78bfa;" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
-                        </svg>
+                        <img src="" alt="">
                         <span style="margin-left: 0.5rem; font-size: 1.25rem; font-weight: 700;">SantriFund</span>
                     </div>
                     <p style="color: #9ca3af;">Platform digital untuk manajemen hafalan dan keuangan santri.</p>

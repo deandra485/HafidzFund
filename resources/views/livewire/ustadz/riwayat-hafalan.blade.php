@@ -13,7 +13,8 @@
     <div class="p-6">
 
         {{-- Filter --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+
             <input type="text" wire:model="searchSantri" class="form-input rounded-xl shadow-sm"
                 placeholder=" Cari nama santri">
 
@@ -31,7 +32,18 @@
                 <option value="kurang_lancar">Kurang Lancar</option>
                 <option value="terbata">Terbata</option>
             </select>
+
+            {{-- NEW: Limit Pagination --}}
+            <select wire:model.live="limit" class="form-select rounded-xl shadow-sm">
+                <option value="10">10 Data</option>
+                <option value="20">20 Data</option>
+                <option value="50">50 Data</option>
+                <option value="100">100 Data</option>
+                <option value="999999">Semua</option>
+            </select>
+
         </div>
+
 
         {{-- Table --}}
         <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
@@ -77,6 +89,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="mt-4">
+                {{ $setoran->links() }}
+            </div>
 
             @if($setoran->isEmpty())
             <p class="text-center text-gray-500 py-4">Belum ada setoran.</p>

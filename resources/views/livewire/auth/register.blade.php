@@ -110,14 +110,12 @@
                 </div>
             </div>
 
-            <div class="w-full mt-5">
-                <a href="{{ route('auth.login') }}"
-                wire:navigate
+            <button wire:click.prevent="register"
                 class="block w-full bg-orange-600 text-white py-3 rounded-lg font-semibold
-                        hover:bg-orange-700 transition duration-300 text-center">
-                    Login
-                </a>
-            </div>
+                    hover:bg-orange-700 transition duration-300 text-center mt-4">
+                Daftar
+            </button>
+
 
             <div class="mt-4 text-center">
                 <p class="text-sm text-gray-600">
