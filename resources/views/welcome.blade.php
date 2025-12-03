@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SantriFund - Sistem Manajemen Hafalan & Keuangan Santri</title>
+    <link rel="icon" type="image/png" href="public/enno/image/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="public/enno/image/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="public/enno/image/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="public/enno/image/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="public/enno/image/favicon/site.webmanifest" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

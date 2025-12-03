@@ -22,7 +22,7 @@ class LaporanHafalan extends Component
     
     public $barChartLabels = [];
     public $barChartData = [];
-    public $pieChartLabels = [];
+    public $pieChartLabels = ['Lancar', 'Kurang Lancar', 'Terbata'];
     public $pieChartData = [];
     public $lineChartLabels = [];
     public $lineChartData = [];
@@ -39,10 +39,25 @@ class LaporanHafalan extends Component
         $this->loadData();
     }
 
-    public function updatedPeriode() { $this->loadData(); }
-    public function updatedBulan() { $this->loadData(); }
-    public function updatedUstadzId() { $this->loadData(); }
-    public function updatedKelas() { $this->loadData(); }
+    public function updatedPeriode() 
+    { 
+        $this->loadData(); 
+    }
+    
+    public function updatedBulan() 
+    { 
+        $this->loadData(); 
+    }
+    
+    public function updatedUstadzId() 
+    { 
+        $this->loadData(); 
+    }
+    
+    public function updatedKelas() 
+    { 
+        $this->loadData(); 
+    }
 
     public function applyFilter()
     {
@@ -56,14 +71,22 @@ class LaporanHafalan extends Component
         $this->loadPieChart();
         $this->loadLineChart();
 
-        $this->dispatch('refreshCharts');
+        // Dispatch event untuk update charts
+        $this->dispatch('refreshCharts', [
+            'barLabels' => $this->barChartLabels,
+            'barData' => $this->barChartData,
+            'pieLabels' => $this->pieChartLabels,
+            'pieData' => $this->pieChartData,
+            'lineLabels' => $this->lineChartLabels,
+            'lineData' => $this->lineChartData,
+        ]);
     }
 
     private function getDateRange()
     {
         switch ($this->periode) {
             case 'harian':
-                return [now()->format('Y-m-d'), now()->format('Y-m-d')];
+                return [now()->startOfDay(), now()->endOfDay()];
 
             case 'minggu_ini':
                 return [now()->startOfWeek(), now()->endOfWeek()];
@@ -81,6 +104,9 @@ class LaporanHafalan extends Component
                 return [now()->startOfYear(), now()->endOfYear()];
 
             case 'custom':
+                if (!$this->bulan) {
+                    return [now()->startOfMonth(), now()->endOfMonth()];
+                }
                 $start = date('Y-m-01', strtotime($this->bulan));
                 $end = date('Y-m-t', strtotime($this->bulan));
                 return [$start, $end];
@@ -113,98 +139,84 @@ class LaporanHafalan extends Component
         $this->totalSantriAktif = $santriQuery->count();
     }
 
-    // =======================
-    // BAR CHART (DINAMIS)
-    // =======================
     private function loadBarChart()
     {
         [$start, $end] = $this->getDateRange();
 
-        $labels = [];
-        $data = [];
+        // Ambil data ustadz beserta total setoran santri binaannya
+        $ustadzData = User::ustadz()
+            ->where('is_active', true)
+            ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
+            ->get()
+            ->map(function($ustadz) use ($start, $end) {
+                $totalSetoran = SetoranHafalan::whereHas('santri', function($q) use ($ustadz) {
+                    $q->where('ustadz_pembimbing_id', $ustadz->id);
+                })
+                ->whereBetween('tanggal_setoran', [$start, $end])
+                ->count();
 
-        if ($this->periode === 'minggu_ini') {
+                return [
+                    'nama' => $ustadz->nama_lengkap,
+                    'total' => $totalSetoran
+                ];
+            })
+            ->where('total', '>', 0)
+            ->sortByDesc('total')
+            ->take(10)
+            ->values();
 
-            for ($i = 6; $i >= 0; $i--) {
-                $tgl = now()->subDays($i)->format('Y-m-d');
-                $labels[] = now()->subDays($i)->format('d M');
-
-                $data[] = SetoranHafalan::whereDate('tanggal_setoran', $tgl)
-                    ->when($this->ustadz_id, fn($q) => $q->where('ustadz_id', $this->ustadz_id))
-                    ->count();
-            }
-
-        } else {
-
-            $period = CarbonPeriod::create($start, $end);
-
-            foreach ($period as $date) {
-                $tgl = $date->format('Y-m-d');
-
-                $labels[] = $date->format('d M');
-
-                $data[] = SetoranHafalan::whereDate('tanggal_setoran', $tgl)
-                    ->when($this->ustadz_id, fn($q) => $q->where('ustadz_id', $this->ustadz_id))
-                    ->count();
-            }
-        }
-
-        $this->barChartLabels = $labels;
-        $this->barChartData = $data;
+        $this->barChartLabels = $ustadzData->pluck('nama')->toArray();
+        $this->barChartData = $ustadzData->pluck('total')->toArray();
     }
 
-    // =======================
-    // PIE CHART
-    // =======================
     private function loadPieChart()
     {
         [$start, $end] = $this->getDateRange();
 
         $query = SetoranHafalan::whereBetween('tanggal_setoran', [$start, $end])
-            ->when($this->ustadz_id, fn($q) => $q->where('ustadz_id', $this->ustadz_id));
+            ->when($this->ustadz_id, function($q) {
+                $q->whereHas('santri', fn($s) => $s->where('ustadz_pembimbing_id', $this->ustadz_id));
+            })
+            ->when($this->kelas, function($q) {
+                $q->whereHas('santri', fn($s) => $s->where('kelas', $this->kelas));
+            });
 
-        $penilaian = $query->select('penilaian', DB::raw('COUNT(*) as total'))
-            ->groupBy('penilaian')
-            ->get();
+        $lancar = $query->clone()->where('penilaian', 'lancar')->count();
+        $kurangLancar = $query->clone()->where('penilaian', 'kurang_lancar')->count();
+        $terbata = $query->clone()->where('penilaian', 'terbata')->count();
 
-        $this->pieChartLabels = ['Lancar', 'Kurang Lancar', 'Terbata'];
-        $this->pieChartData = [
-            $penilaian->where('penilaian', 'lancar')->first()->total ?? 0,
-            $penilaian->where('penilaian', 'kurang_lancar')->first()->total ?? 0,
-            $penilaian->where('penilaian', 'terbata')->first()->total ?? 0,
-        ];
+        $this->pieChartData = [$lancar, $kurangLancar, $terbata];
     }
 
-    // =======================
-    // LINE CHART
-    // =======================
     private function loadLineChart()
     {
         [$start, $end] = $this->getDateRange();
 
-        $labels = [];
-        $data = [];
-
-        $period = CarbonPeriod::create($start, $end);
-
-        foreach ($period as $date) {
-
-            $labels[] = $date->format('d M');
-
-            $avg = SetoranHafalan::whereDate('tanggal_setoran', $date)
-                ->when($this->ustadz_id, fn($q) => $q->where('ustadz_id', $this->ustadz_id))
+        // Ambil data ustadz beserta rata-rata nilai santri binaannya
+        $ustadzData = User::ustadz()
+            ->where('is_active', true)
+            ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
+            ->get()
+            ->map(function($ustadz) use ($start, $end) {
+                $avgNilai = SetoranHafalan::whereHas('santri', function($q) use ($ustadz) {
+                    $q->where('ustadz_pembimbing_id', $ustadz->id);
+                })
+                ->whereBetween('tanggal_setoran', [$start, $end])
                 ->avg('nilai_angka');
+                
+                return [
+                    'nama' => $ustadz->nama_lengkap,
+                    'rata_nilai' => round($avgNilai ?? 0, 2)
+                ];
+            })
+            ->where('rata_nilai', '>', 0)
+            ->sortBy('nama')
+            ->values();
 
-            $data[] = $avg ? round($avg, 2) : 0;
-        }
-
-        $this->lineChartLabels = $labels;
-        $this->lineChartData = $data;
+        $this->lineChartLabels = $ustadzData->pluck('nama')->toArray();
+        $this->lineChartData = $ustadzData->pluck('rata_nilai')->toArray();
     }
 
-    // =======================
-    // RENDER
-    // =======================
     public function render()
     {
         [$start, $end] = $this->getDateRange();
@@ -219,28 +231,36 @@ class LaporanHafalan extends Component
             ->get();
 
         $ustadzStats = User::ustadz()
-            ->with(['setoranHafalan' => fn($q) => $q->whereBetween('tanggal_setoran', [$start, $end])])
+            ->where('is_active', true)
+            ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
             ->get()
             ->map(function ($ustadz) use ($start, $end) {
+                $setoranQuery = SetoranHafalan::whereHas('santri', function($q) use ($ustadz) {
+                    $q->where('ustadz_pembimbing_id', $ustadz->id);
+                })->whereBetween('tanggal_setoran', [$start, $end]);
 
-                $setoran = SetoranHafalan::where('ustadz_id', $ustadz->id)
-                    ->whereBetween('tanggal_setoran', [$start, $end]);
-
+                $totalSetoran = $setoranQuery->count();
+                $santriBinaan = Santri::where('ustadz_pembimbing_id', $ustadz->id)->count();
+                $rataNilai = round($setoranQuery->avg('nilai_angka') ?? 0, 2);
+                $lancar = $setoranQuery->where('penilaian', 'lancar')->count();
+                
                 return [
                     'id' => $ustadz->id,
                     'nama' => $ustadz->nama_lengkap,
-                    'total_setoran' => $setoran->count(),
-                    'santri_binaan' => Santri::where('ustadz_pembimbing_id', $ustadz->id)->count(),
-                    'rata_nilai' => round($setoran->avg('nilai_angka') ?? 0, 2),
-                    'lancar' => $setoran->where('penilaian', 'lancar')->count(),
+                    'total_setoran' => $totalSetoran,
+                    'santri_binaan' => $santriBinaan,
+                    'rata_nilai' => $rataNilai,
+                    'lancar' => $lancar,
                 ];
             })
+            ->where('total_setoran', '>', 0)
             ->sortByDesc('total_setoran')
             ->take(5);
 
         $distribusiKelas = Santri::aktif()
             ->with('progressHafalan')
             ->when($this->ustadz_id, fn($q) => $q->where('ustadz_pembimbing_id', $this->ustadz_id))
+            ->when($this->kelas, fn($q) => $q->where('kelas', $this->kelas))
             ->get()
             ->groupBy('kelas')
             ->map(fn($s) => [
@@ -253,7 +273,7 @@ class LaporanHafalan extends Component
             'topSantri' => $topSantri,
             'ustadzStats' => $ustadzStats,
             'distribusiKelas' => $distribusiKelas,
-            'ustadzList' => User::ustadz()->active()->get(),
+            'ustadzList' => User::ustadz()->where('is_active', true)->get(),
             'kelasList' => Santri::distinct()->pluck('kelas'),
         ]);
     }

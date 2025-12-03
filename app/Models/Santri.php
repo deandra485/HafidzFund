@@ -35,17 +35,12 @@ class Santri extends Model
 
     public function setoranHafalan()
     {
-        return $this->hasMany(SetoranHafalan::class);
+        return $this->hasMany(SetoranHafalan::class, 'santri_id');
     }
 
     public function progressHafalan()
     {
         return $this->hasOne(ProgressHafalan::class);
-    }
-
-    public function targetHafalan()
-    {
-        return $this->hasMany(TargetHafalan::class);
     }
 
     public function jadwalSetoran()
@@ -56,11 +51,6 @@ class Santri extends Model
     public function kehadiranSetoran()
     {
         return $this->hasMany(KehadiranSetoran::class);
-    }
-
-    public function ujianHafalan()
-    {
-        return $this->hasMany(UjianHafalan::class);
     }
 
     public function saldoJajan()

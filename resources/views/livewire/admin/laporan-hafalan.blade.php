@@ -141,7 +141,7 @@
                     </svg>
                 </div>
             </div>
-            <canvas id="barChart" wire:ignore></canvas>
+            <canvas id="barChart" wire:ignore height="140"></canvas>
         </div>
 
         <!-- Pie Chart - Distribusi Penilaian -->
@@ -158,7 +158,7 @@
                     </svg>
                 </div>
             </div>
-            <canvas id="pieChart" wire:ignore></canvas>
+            <canvas id="pieChart" wire:ignore height="140"></canvas>
             <div class="mt-4 space-y-2">
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex items-center gap-2">
@@ -198,7 +198,7 @@
                 </svg>
             </div>
         </div>
-        <canvas id="lineChart" wire:ignore></canvas>
+        <canvas id="lineChart" wire:ignore height="140"></canvas>
     </div>
 
     <!-- Tables Section -->
@@ -369,76 +369,80 @@
     </div>
 </div>    
 
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("livewire:initialized", () => {
+let barChart = null;
+let pieChart = null;
+let lineChart = null;
 
-    let barCtx = document.getElementById('barChart').getContext('2d');
-    let lineCtx = document.getElementById('lineChart').getContext('2d');
-    let pieCtx = document.getElementById('pieChart').getContext('2d');
+function renderCharts(barLabels, barData, pieLabels, pieData, lineLabels, lineData) {
 
-    let barChart = new Chart(barCtx, {
-        type: "bar",
+    // destroy dulu biar aman
+    if (barChart) barChart.destroy();
+    if (pieChart) pieChart.destroy();
+    if (lineChart) lineChart.destroy();
+
+    // BAR CHART
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(barCtx, {
+        type: 'bar',
         data: {
-            labels: @json($barChartLabels),
+            labels: barLabels,
             datasets: [{
-                label: "Total Setoran",
-                data: @json($barChartData),
-                backgroundColor: "rgba(54, 162, 235, 0.7)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2
+                label: 'Total Setoran',
+                data: barData,
+                backgroundColor: '#3b82f6'
             }]
         }
     });
 
-    let lineChart = new Chart(lineCtx, {
-        type: "line",
+    // PIE CHART
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    pieChart = new Chart(pieCtx, {
+        type: 'pie',
         data: {
-            labels: @json($lineChartLabels),
+            labels: pieLabels,
             datasets: [{
-                label: "Rata-rata Nilai",
-                data: @json($lineChartData),
-                borderColor: "rgba(75,192,192,1)",
-                borderWidth: 2,
-                tension: 0.4
+                data: pieData,
+                backgroundColor: ['#10b981', '#f97316', '#ef4444']
             }]
         }
     });
 
-    let pieChart = new Chart(pieCtx, {
-        type: "pie",
+    // LINE CHART
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    lineChart = new Chart(lineCtx, {
+        type: 'line',
         data: {
-            labels: @json($pieChartLabels),
+            labels: lineLabels,
             datasets: [{
-                data: @json($pieChartData),
-                backgroundColor: [
-                    "rgba(34,197,94,0.7)",
-                    "rgba(234,179,8,0.7)",
-                    "rgba(239,68,68,0.7)"
-                ]
+                label: 'Rata-rata Nilai',
+                data: lineData,
+                borderColor: '#6366f1',
+                tension: 0.3
             }]
         }
     });
+}
 
-    // 🚀 Update grafik ketika Livewire mengirim event
-    Livewire.on("refreshCharts", () => {
+// EVENT LIVEWIRE
+document.addEventListener('livewire:init', () => {
 
-        barChart.data.labels = @json($barChartLabels);
-        barChart.data.datasets[0].data = @json($barChartData);
-        barChart.update();
+    Livewire.on('refreshCharts', () => {
+    renderCharts(
+        @this.barChartLabels,
+        @this.barChartData,
+        @this.pieChartLabels,
+        @this.pieChartData,
+        @this.lineChartLabels,
+        @this.lineChartData,
+    );
+});
 
-        lineChart.data.labels = @json($lineChartLabels);
-        lineChart.data.datasets[0].data = @json($lineChartData);
-        lineChart.update();
-
-        pieChart.data.labels = @json($pieChartLabels);
-        pieChart.data.datasets[0].data = @json($pieChartData);
-        pieChart.update();
-    });
 
 });
 </script>
-    @endpush
-</div>
+@endpush
+

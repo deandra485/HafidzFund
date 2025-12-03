@@ -15,8 +15,6 @@ class ProgressHafalan extends Model
         'santri_id',
         'total_juz',
         'total_halaman',
-        'juz_terakhir',
-        'surah_terakhir',
         'persentase_hafalan',
         'last_setoran_date',
     ];

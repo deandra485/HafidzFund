@@ -54,11 +54,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function laporans()
-    {
-        return $this->hasMany(Laporan::class);
-    }
-
         // Relationships
     public function santriBinaan()
     {

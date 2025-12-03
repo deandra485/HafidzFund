@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('santri_id')->unique()->constrained('santri')->onDelete('cascade');
             $table->decimal('total_juz', 4, 2)->default(0);
             $table->decimal('total_halaman', 6, 2)->default(0);
-            $table->integer('juz_terakhir')->nullable();
-            $table->string('surah_terakhir', 50)->nullable();
             $table->decimal('persentase_hafalan', 5, 2)->default(0);
             $table->date('last_setoran_date')->nullable();
             $table->timestamps();
