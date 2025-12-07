@@ -12,19 +12,25 @@ class ProgressHafalan extends Model
     protected $table = 'progress_hafalan';
 
     protected $fillable = [
-        'santri_id',
-        'total_juz',
-        'total_halaman',
-        'persentase_hafalan',
-        'last_setoran_date',
-    ];
+    'santri_id',
+    'total_juz',
+    'total_halaman',
+    'persentase_hafalan',
+    'last_setoran_date',
+    'juz_terakhir',
+    'surah_terakhir',
+];
+
 
     protected $casts = [
-        'total_juz' => 'decimal:2',
-        'total_halaman' => 'decimal:2',
-        'persentase_hafalan' => 'decimal:2',
-        'last_setoran_date' => 'date',
-    ];
+    'total_juz' => 'decimal:2',
+    'total_halaman' => 'decimal:2',
+    'persentase_hafalan' => 'decimal:2',
+    'last_setoran_date' => 'date',
+    'juz_terakhir' => 'integer',
+    'surah_terakhir' => 'string',
+];
+
 
     // Relationships
    public function santri()

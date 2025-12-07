@@ -1,28 +1,14 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 mx-auto my-auto rounded-xl shadow">
     <!-- Header -->
     <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b border-gray-200 backdrop-blur-md bg-white/70 sticky top-0 z-50">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Laporan Hafalan</h1>
-                <p class="text-gray-600 mt-1">Monitoring dan evaluasi progress hafalan santri</p>
-            </div>
-            {{-- <div class="flex gap-3">
-                <button wire:click="exportPDF" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 font-medium">
-                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                    Export PDF
-                </button>
-                <button wire:click="exportExcel" class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 flex items-center gap-2 font-medium shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Export Excel
-                </button>
-            </div> --}}
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Laporan Hafalan</h1>
+            <p class="text-gray-600 mt-1">Monitoring dan evaluasi progress hafalan santri</p>
+        </div>
     </header>
 
     <!-- Filter Section -->
-    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6 mx-6 mt-6">
         <div class="grid grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Periode</label>
@@ -35,7 +21,6 @@
                     <option value="custom">Custom</option>
                 </select>
             </div>
-            <input type="month" wire:model="bulan" class="border px-3 py-2 rounded">
 
             @if($periode === 'custom')
             <div>
@@ -76,7 +61,7 @@
     </div>
 
     <!-- Summary Statistics -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10" wire:poll.60s="loadData">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mx-6 mb-6">
         <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition">
             <div class="flex items-center justify-between mb-4">
                 <div class="bg-white bg-opacity-20 rounded-lg p-3">
@@ -127,13 +112,14 @@
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-3 gap-6 mb-6">
-        <!-- Bar Chart - Setoran Per Bulan -->
+    <!-- Charts Section -->
+    <div class="grid grid-cols-3 gap-6 mb-6 mx-6">
+        <!-- Bar Chart -->
         <div class="col-span-2 bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800">Jumlah Setoran Per Bulan</h3>
-                    <p class="text-sm text-gray-500">6 bulan terakhir</p>
+                    <h3 class="text-lg font-bold text-gray-800">Jumlah Setoran Per Ustadz</h3>
+                    <p class="text-sm text-gray-500">Total setoran dari setiap ustadz pembimbing</p>
                 </div>
                 <div class="bg-blue-100 p-2 rounded-lg">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,10 +127,12 @@
                     </svg>
                 </div>
             </div>
-            <canvas id="barChart" wire:ignore height="140"></canvas>
+            <div style="position: relative; height: 300px;">
+                <canvas id="barChart"></canvas>
+            </div>
         </div>
 
-        <!-- Pie Chart - Distribusi Penilaian -->
+        <!-- Pie Chart -->
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
@@ -158,7 +146,9 @@
                     </svg>
                 </div>
             </div>
-            <canvas id="pieChart" wire:ignore height="140"></canvas>
+            <div style="position: relative; height: 250px;">
+                <canvas id="pieChart"></canvas>
+            </div>
             <div class="mt-4 space-y-2">
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex items-center gap-2">
@@ -185,24 +175,8 @@
         </div>
     </div>
 
-    <!-- Line Chart - Rata-rata Nilai -->
-    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h3 class="text-lg font-bold text-gray-800">Tren Rata-rata Nilai Hafalan</h3>
-                <p class="text-sm text-gray-500">Perkembangan nilai 6 bulan terakhir</p>
-            </div>
-            <div class="bg-purple-100 p-2 rounded-lg">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-                </svg>
-            </div>
-        </div>
-        <canvas id="lineChart" wire:ignore height="140"></canvas>
-    </div>
-
     <!-- Tables Section -->
-    <div class="grid grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-2 gap-6 mb-6 mx-6">
         <!-- Top 10 Santri Terbaik -->
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-green-500 to-green-700 px-6 py-4">
@@ -329,7 +303,7 @@
     </div>
 
     <!-- Distribusi Per Kelas -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="bg-white rounded-lg shadow-sm p-6 mx-6 mb-6">
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h3 class="text-lg font-bold text-gray-800">Distribusi Hafalan Per Kelas</h3>
@@ -367,82 +341,116 @@
             @endforeach
         </div>
     </div>
-</div>    
+</div>
 
-    
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script>
-let barChart = null;
-let pieChart = null;
-let lineChart = null;
+(function() {
+    console.log('🚀 Script loaded');
+    
+    let barChart = null;
+    let pieChart = null;
 
-function renderCharts(barLabels, barData, pieLabels, pieData, lineLabels, lineData) {
-
-    // destroy dulu biar aman
-    if (barChart) barChart.destroy();
-    if (pieChart) pieChart.destroy();
-    if (lineChart) lineChart.destroy();
-
-    // BAR CHART
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    barChart = new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: barLabels,
-            datasets: [{
-                label: 'Total Setoran',
-                data: barData,
-                backgroundColor: '#3b82f6'
-            }]
+    function createCharts() {
+        console.log('📊 Creating charts...');
+        
+        // Cek canvas ada atau tidak
+        const barCanvas = document.getElementById('barChart');
+        const pieCanvas = document.getElementById('pieChart');
+        
+        if (!barCanvas || !pieCanvas) {
+            console.log('⏳ Canvas not ready, retrying...');
+            setTimeout(createCharts, 100);
+            return;
         }
+
+        console.log('✅ Canvas found');
+
+        // Hancurkan chart lama
+        if (barChart) barChart.destroy();
+        if (pieChart) pieChart.destroy();
+
+        // Data dari PHP
+        const barLabels = {!! json_encode($barChartLabels ?? []) !!};
+        const barData = {!! json_encode($barChartData ?? []) !!};
+        const pieData = {!! json_encode($pieChartData ?? [0,0,0]) !!};
+
+        console.log('📦 Data:', { barLabels, barData, pieData });
+
+        // BAR CHART
+        try {
+            barChart = new Chart(barCanvas, {
+                type: 'bar',
+                data: {
+                    labels: barLabels,
+                    datasets: [{
+                        label: 'Total Setoran',
+                        data: barData,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+            console.log('✅ Bar chart created');
+        } catch (e) {
+            console.error('❌ Bar chart error:', e);
+        }
+
+        // PIE CHART
+        try {
+            pieChart = new Chart(pieCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Lancar', 'Kurang Lancar', 'Terbata'],
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: ['#10b981', '#f97316', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%'
+                }
+            });
+            console.log('✅ Pie chart created');
+        } catch (e) {
+            console.error('❌ Pie chart error:', e);
+        }
+    }
+
+    // Jalankan saat halaman ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', createCharts);
+    } else {
+        createCharts();
+    }
+
+    // Update saat Livewire refresh
+    window.addEventListener('chartsUpdated', function() {
+        console.log('🔄 Updating charts...');
+        setTimeout(createCharts, 200);
     });
 
-    // PIE CHART
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    pieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: pieLabels,
-            datasets: [{
-                data: pieData,
-                backgroundColor: ['#10b981', '#f97316', '#ef4444']
-            }]
-        }
-    });
-
-    // LINE CHART
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    lineChart = new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: lineLabels,
-            datasets: [{
-                label: 'Rata-rata Nilai',
-                data: lineData,
-                borderColor: '#6366f1',
-                tension: 0.3
-            }]
-        }
-    });
-}
-
-// EVENT LIVEWIRE
-document.addEventListener('livewire:init', () => {
-
-    Livewire.on('refreshCharts', () => {
-    renderCharts(
-        @this.barChartLabels,
-        @this.barChartData,
-        @this.pieChartLabels,
-        @this.pieChartData,
-        @this.lineChartLabels,
-        @this.lineChartData,
-    );
-});
-
-
-});
+    // Livewire hook
+    document.addEventListener('livewire:navigated', createCharts);
+    
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('message.processed', () => {
+            setTimeout(createCharts, 200);
+        });
+    }
+})();
 </script>
 @endpush
-

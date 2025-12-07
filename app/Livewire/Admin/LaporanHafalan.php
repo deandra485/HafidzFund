@@ -8,8 +8,7 @@ use App\Models\SetoranHafalan;
 use App\Models\Santri;
 use App\Models\User;
 use App\Models\ProgressHafalan;
-use Illuminate\Support\Facades\DB;
-use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('layouts.guest')]
 class LaporanHafalan extends Component
@@ -23,9 +22,7 @@ class LaporanHafalan extends Component
     public $barChartLabels = [];
     public $barChartData = [];
     public $pieChartLabels = ['Lancar', 'Kurang Lancar', 'Terbata'];
-    public $pieChartData = [];
-    public $lineChartLabels = [];
-    public $lineChartData = [];
+    public $pieChartData = [0, 0, 0];
     
     public $totalSetoran = 0;
     public $totalSantriAktif = 0;
@@ -37,6 +34,12 @@ class LaporanHafalan extends Component
         $this->bulan = now()->format('Y-m');
         $this->tahun = now()->year;
         $this->loadData();
+        
+        Log::info('Laporan Hafalan Mounted', [
+            'barLabels' => $this->barChartLabels,
+            'barData' => $this->barChartData,
+            'pieData' => $this->pieChartData
+        ]);
     }
 
     public function updatedPeriode() 
@@ -62,6 +65,7 @@ class LaporanHafalan extends Component
     public function applyFilter()
     {
         $this->loadData();
+        $this->dispatch('chartsUpdated');
     }
 
     public function loadData()
@@ -69,17 +73,15 @@ class LaporanHafalan extends Component
         $this->loadStatistics();
         $this->loadBarChart();
         $this->loadPieChart();
-        $this->loadLineChart();
 
-        // Dispatch event untuk update charts
-        $this->dispatch('refreshCharts', [
+        Log::info('Data Loaded', [
             'barLabels' => $this->barChartLabels,
             'barData' => $this->barChartData,
-            'pieLabels' => $this->pieChartLabels,
-            'pieData' => $this->pieChartData,
-            'lineLabels' => $this->lineChartLabels,
-            'lineData' => $this->lineChartData,
+            'pieData' => $this->pieChartData
         ]);
+
+        // Dispatch event untuk JavaScript
+        $this->dispatch('chartsUpdated');
     }
 
     private function getDateRange()
@@ -120,7 +122,9 @@ class LaporanHafalan extends Component
         [$start, $end] = $this->getDateRange();
 
         $query = SetoranHafalan::whereBetween('tanggal_setoran', [$start, $end])
-            ->when($this->ustadz_id, fn($q) => $q->where('ustadz_id', $this->ustadz_id))
+            ->when($this->ustadz_id, function($q) {
+                $q->whereHas('santri', fn($s) => $s->where('ustadz_pembimbing_id', $this->ustadz_id));
+            })
             ->when($this->kelas, fn($q) => $q->whereHas('santri', fn($s) => $s->where('kelas', $this->kelas)));
 
         $this->totalSetoran = $query->count();
@@ -132,7 +136,7 @@ class LaporanHafalan extends Component
             ? round(($lancarCount / $this->totalSetoran) * 100, 2)
             : 0;
 
-        $santriQuery = Santri::aktif()
+        $santriQuery = Santri::where('status', 'aktif')
             ->when($this->kelas, fn($q) => $q->where('kelas', $this->kelas))
             ->when($this->ustadz_id, fn($q) => $q->where('ustadz_pembimbing_id', $this->ustadz_id));
 
@@ -144,7 +148,7 @@ class LaporanHafalan extends Component
         [$start, $end] = $this->getDateRange();
 
         // Ambil data ustadz beserta total setoran santri binaannya
-        $ustadzData = User::ustadz()
+        $ustadzData = User::where('role', 'ustadz')
             ->where('is_active', true)
             ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
             ->get()
@@ -160,13 +164,24 @@ class LaporanHafalan extends Component
                     'total' => $totalSetoran
                 ];
             })
-            ->where('total', '>', 0)
+            ->filter(fn($item) => $item['total'] > 0)
             ->sortByDesc('total')
             ->take(10)
             ->values();
 
         $this->barChartLabels = $ustadzData->pluck('nama')->toArray();
         $this->barChartData = $ustadzData->pluck('total')->toArray();
+
+        // Jika tidak ada data, beri data dummy untuk testing
+        if (empty($this->barChartLabels)) {
+            $this->barChartLabels = ['Tidak Ada Data'];
+            $this->barChartData = [0];
+        }
+
+        Log::info('Bar Chart Data Loaded', [
+            'labels' => $this->barChartLabels,
+            'data' => $this->barChartData
+        ]);
     }
 
     private function loadPieChart()
@@ -186,35 +201,10 @@ class LaporanHafalan extends Component
         $terbata = $query->clone()->where('penilaian', 'terbata')->count();
 
         $this->pieChartData = [$lancar, $kurangLancar, $terbata];
-    }
 
-    private function loadLineChart()
-    {
-        [$start, $end] = $this->getDateRange();
-
-        // Ambil data ustadz beserta rata-rata nilai santri binaannya
-        $ustadzData = User::ustadz()
-            ->where('is_active', true)
-            ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
-            ->get()
-            ->map(function($ustadz) use ($start, $end) {
-                $avgNilai = SetoranHafalan::whereHas('santri', function($q) use ($ustadz) {
-                    $q->where('ustadz_pembimbing_id', $ustadz->id);
-                })
-                ->whereBetween('tanggal_setoran', [$start, $end])
-                ->avg('nilai_angka');
-                
-                return [
-                    'nama' => $ustadz->nama_lengkap,
-                    'rata_nilai' => round($avgNilai ?? 0, 2)
-                ];
-            })
-            ->where('rata_nilai', '>', 0)
-            ->sortBy('nama')
-            ->values();
-
-        $this->lineChartLabels = $ustadzData->pluck('nama')->toArray();
-        $this->lineChartData = $ustadzData->pluck('rata_nilai')->toArray();
+        Log::info('Pie Chart Data Loaded', [
+            'data' => $this->pieChartData
+        ]);
     }
 
     public function render()
@@ -227,10 +217,11 @@ class LaporanHafalan extends Component
             ->when($this->kelas, fn($q) => $q->where('santri.kelas', $this->kelas))
             ->when($this->ustadz_id, fn($q) => $q->where('santri.ustadz_pembimbing_id', $this->ustadz_id))
             ->orderBy('progress_hafalan.persentase_hafalan', 'desc')
+            ->select('progress_hafalan.*')
             ->take(10)
             ->get();
 
-        $ustadzStats = User::ustadz()
+        $ustadzStats = User::where('role', 'ustadz')
             ->where('is_active', true)
             ->when($this->ustadz_id, fn($q) => $q->where('id', $this->ustadz_id))
             ->get()
@@ -240,7 +231,9 @@ class LaporanHafalan extends Component
                 })->whereBetween('tanggal_setoran', [$start, $end]);
 
                 $totalSetoran = $setoranQuery->count();
-                $santriBinaan = Santri::where('ustadz_pembimbing_id', $ustadz->id)->count();
+                $santriBinaan = Santri::where('ustadz_pembimbing_id', $ustadz->id)
+                    ->where('status', 'aktif')
+                    ->count();
                 $rataNilai = round($setoranQuery->avg('nilai_angka') ?? 0, 2);
                 $lancar = $setoranQuery->where('penilaian', 'lancar')->count();
                 
@@ -253,11 +246,11 @@ class LaporanHafalan extends Component
                     'lancar' => $lancar,
                 ];
             })
-            ->where('total_setoran', '>', 0)
+            ->filter(fn($stat) => $stat['total_setoran'] > 0)
             ->sortByDesc('total_setoran')
             ->take(5);
 
-        $distribusiKelas = Santri::aktif()
+        $distribusiKelas = Santri::where('status', 'aktif')
             ->with('progressHafalan')
             ->when($this->ustadz_id, fn($q) => $q->where('ustadz_pembimbing_id', $this->ustadz_id))
             ->when($this->kelas, fn($q) => $q->where('kelas', $this->kelas))
@@ -269,12 +262,12 @@ class LaporanHafalan extends Component
                 'rata_persen' => round($s->avg(fn($i) => $i->progressHafalan->persentase_hafalan ?? 0), 2),
             ]);
 
-        return view('livewire.admin.laporan-hafalan', [
+      return view('livewire.admin.laporan-hafalan', [
             'topSantri' => $topSantri,
             'ustadzStats' => $ustadzStats,
             'distribusiKelas' => $distribusiKelas,
-            'ustadzList' => User::ustadz()->where('is_active', true)->get(),
+            'ustadzList' => User::where('role', 'ustadz')->where('is_active', true)->get(),
             'kelasList' => Santri::distinct()->pluck('kelas'),
-        ]);
+      ]); // ATAU 'layouts.guest', sesuaikan
     }
 }

@@ -110,12 +110,11 @@
                 </div>
             </div>
 
-            <button wire:click.prevent="register"
-                class="block w-full bg-orange-600 text-white py-3 rounded-lg font-semibold
+            <a wire:navigate href="/register"
+            class="block w-full bg-orange-600 text-white py-3 rounded-lg font-semibold
                     hover:bg-orange-700 transition duration-300 text-center mt-4">
                 Daftar
-            </button>
-
+            </a>
 
             <div class="mt-4 text-center">
                 <p class="text-sm text-gray-600">

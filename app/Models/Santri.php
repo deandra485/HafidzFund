@@ -27,6 +27,21 @@ class Santri extends Model
         'tanggal_lahir' => 'date',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($santri) {
+            // Cek dulu apakah progress sudah ada
+            if (!$santri->progressHafalan()->exists()) {
+                $santri->progressHafalan()->create([
+                    'total_juz' => 0,
+                    'total_halaman' => 0,
+                    'persentase_hafalan' => 0,
+                    'last_setoran_date' => null,
+                ]);
+            }
+        });
+    }
+
     // Relationships
     public function ustadzPembimbing()
     {
@@ -40,7 +55,7 @@ class Santri extends Model
 
     public function progressHafalan()
     {
-        return $this->hasOne(ProgressHafalan::class);
+        return $this->hasOne(ProgressHafalan::class, 'santri_id');
     }
 
     public function jadwalSetoran()
@@ -48,10 +63,6 @@ class Santri extends Model
         return $this->hasMany(JadwalSetoran::class);
     }
 
-    public function kehadiranSetoran()
-    {
-        return $this->hasMany(KehadiranSetoran::class);
-    }
 
     public function saldoJajan()
     {
@@ -61,6 +72,11 @@ class Santri extends Model
     public function transaksiJajan()
     {
         return $this->hasMany(TransaksiJajan::class);
+    }
+
+    public function kehadiranSetoran()
+    {
+        return $this->hasMany(KehadiranSetoran::class);
     }
 
     // Scopes
@@ -77,6 +93,15 @@ class Santri extends Model
     public function scopeByAngkatan($query, $angkatan)
     {
         return $query->where('angkatan', $angkatan);
+    }
+
+    // Generate otomatis NIS
+    public static function generateNIS()
+    {
+        $last = self::latest('id')->first();
+        $next = $last ? $last->id + 1 : 1;
+
+        return '2025' . str_pad($next, 5, '0', STR_PAD_LEFT);
     }
 
     // Accessors

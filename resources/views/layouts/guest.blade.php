@@ -4,20 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="public/image/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="public/image/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="public/image/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="public/image/favicon/apple-touch-icon.png" />
-    <link rel="manifest" href="public/image/favicon/site.webmanifest" />
+    
+    <!-- FIX: Hapus 'public/' dari path -->
+    <link rel="icon" type="image/png" href="{{ asset('image/favicon/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset('image/favicon/favicon.svg') }}" />
+    <link rel="shortcut icon" href="{{ asset('image/favicon/favicon.ico') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/favicon/apple-touch-icon.png') }}" />
+    <link rel="manifest" href="{{ asset('image/favicon/site.webmanifest') }}" />
+    
     <title>{{ config('app.name') }}</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Tailwind CSS -->
+    <link href="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Chart.js DIPINDAH KE BAWAH, JANGAN DI HEAD -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -78,7 +83,11 @@
             document.getElementById("sidebar").classList.toggle("show");
         });
     </script>
+    
     @livewireScripts
+    
+    <!-- PENTING: Stack untuk scripts dari blade component -->
+    @stack('scripts')
 </body>
 
 </html>
